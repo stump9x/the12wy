@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "The 12 Week Year Planner — Codebase Architecture",
+    "output": "the12w-architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "request-and-state",
+        "label": "Request and planner state",
+        "focus": ["browser", "ui", "provider", "state-api", "repository", "pglite"],
+        "note": "Follow a planner page from the browser to persisted state and back."
+      },
+      {
+        "id": "execution-rules",
+        "label": "Execution scoring",
+        "focus": ["ui", "provider", "domain"],
+        "note": "See where weekly commitments, calendar penalties, and progress rules are evaluated."
+      },
+      {
+        "id": "authentication",
+        "label": "Authentication boundary",
+        "focus": ["browser", "login", "auth-api", "auth-core", "auth-store"],
+        "note": "Trace login credentials into the signed session used by protected routes."
+      }
+    ]
+  },
+  "components": [
+    { "id": "browser", "type": "external", "label": "User Browser", "sublabel": "Desktop / mobile", "pos": [40, 300], "size": [150, 64] },
+    { "id": "ui", "type": "frontend", "label": "Next.js UI", "sublabel": "App Router pages", "pos": [250, 300], "size": [150, 64] },
+    { "id": "provider", "type": "frontend", "label": "PlannerProvider", "sublabel": "Client state + autosave", "pos": [460, 300], "size": [160, 64] },
+    { "id": "state-api", "type": "backend", "label": "State API", "sublabel": "GET / PUT /api/state", "pos": [680, 300], "size": [150, 64] },
+    { "id": "repository", "type": "backend", "label": "Planner Repository", "sublabel": "Migration + persistence", "pos": [890, 300], "size": [170, 64] },
+    { "id": "pglite", "type": "database", "label": "PGlite", "sublabel": "Local durable state", "pos": [1120, 300], "size": [140, 64] },
+    { "id": "domain", "type": "backend", "label": "Domain Rules", "sublabel": "Score + progress", "pos": [460, 460], "size": [160, 64] },
+    { "id": "login", "type": "frontend", "label": "Login / Setup", "sublabel": "Credential forms", "pos": [250, 110], "size": [150, 64] },
+    { "id": "auth-api", "type": "security", "label": "Auth API", "sublabel": "Login + session setup", "pos": [470, 110], "size": [150, 64] },
+    { "id": "auth-core", "type": "security", "label": "Auth Core", "sublabel": "Signed session token", "pos": [690, 110], "size": [150, 64] },
+    { "id": "auth-store", "type": "security", "label": "Auth Store", "sublabel": "Salted password hash", "pos": [900, 110], "size": [150, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Next.js Web Application", "wraps": ["ui", "provider", "state-api", "repository", "domain", "login", "auth-api", "auth-core", "auth-store"] },
+    { "kind": "security-group", "label": "Protected planner state", "wraps": ["state-api", "repository", "pglite"] }
+  ],
+  "connections": [
+    { "id": "browser-ui", "from": "browser", "to": "ui", "label": "HTTP navigation", "variant": "emphasis", "labelDy": -26 },
+    { "id": "ui-provider", "from": "ui", "to": "provider", "label": "React context", "labelDy": -26 },
+    { "id": "provider-state", "from": "provider", "to": "state-api", "label": "GET / PUT planner state", "variant": "emphasis", "labelDy": 56 },
+    { "id": "state-repository", "from": "state-api", "to": "repository", "label": "load / save" },
+    { "id": "repository-pglite", "from": "repository", "to": "pglite", "label": "SQL persistence", "labelDy": -26 },
+    { "id": "provider-domain", "from": "provider", "to": "domain", "label": "score + progress rules", "fromSide": "bottom", "toSide": "top", "labelDy": 24, "labelDx": -100 },
+    { "id": "browser-login", "from": "browser", "to": "login", "label": "login / setup", "fromSide": "top", "toSide": "bottom" },
+    { "id": "login-auth-api", "from": "login", "to": "auth-api", "label": "POST credentials", "labelDy": -26 },
+    { "id": "auth-api-core", "from": "auth-api", "to": "auth-core", "label": "verify + sign", "variant": "security" },
+    { "id": "auth-core-store", "from": "auth-core", "to": "auth-store", "label": "hash verification", "variant": "security", "labelDy": -26 },
+    { "id": "auth-core-state", "from": "auth-core", "to": "state-api", "label": "session guard", "variant": "security", "fromSide": "bottom", "toSide": "top" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Planner flow", "items": ["Next.js route pages render the planner modules", "PlannerProvider debounces PUT updates to /api/state", "Planner Repository migrates and persists state in PGlite"] },
+    { "dot": "cyan", "title": "12 Week Year rules", "items": ["Domain Rules calculate Execution Score from weekly commitments", "Calendar penalties are applied separately from Lag Indicators", "Goals, Tactics, Reviews, and Journal share PlannerState"] },
+    { "dot": "rose", "title": "Security", "items": ["Auth API creates and verifies signed sessions", "Passwords are stored as salted hashes, not plaintext", "State API is protected by the authenticated session"] }
+  ]
+}

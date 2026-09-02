@@ -1,0 +1,59 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "the12w Codebase Mapping with Archify",
+    "output": "archify-pipeline.workflow.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "full-pipeline",
+        "label": "Full mapping pipeline",
+        "focus": ["vscode", "project", "codex", "skill", "read", "json", "validate", "html"],
+        "note": "Follow the repository from the editor to the validated architecture.html artifact."
+      },
+      {
+        "id": "artifact-loop",
+        "label": "Artifact and validation",
+        "focus": ["read", "json", "validate", "html"],
+        "note": "Isolate the JSON specification, validation gate, and final HTML output."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "pipeline", "label": "Codebase → Architecture Artifact" }
+  ],
+  "phases": [
+    { "id": "context", "label": "Context", "fromCol": 0, "toCol": 1 },
+    { "id": "analysis", "label": "Read + model", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "delivery", "label": "Validate + deliver", "fromCol": 4, "toCol": 4, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "source-context", "label": "Source context", "lane": "pipeline", "fromCol": 0, "toCol": 1, "variant": "default" },
+    { "id": "archify-work", "label": "Archify work", "lane": "pipeline", "fromCol": 4, "toCol": 4, "variant": "emphasis" }
+  ],
+  "mainPath": ["vscode", "project", "codex", "skill", "read", "json", "validate", "html"],
+  "nodes": [
+    { "id": "vscode", "lane": "pipeline", "col": 0, "type": "frontend", "label": "VS Code", "sublabel": "editor + terminal", "width": 130 },
+    { "id": "project", "lane": "pipeline", "col": 1, "type": "external", "label": "the12w Project", "sublabel": "Next.js + PGlite codebase", "width": 130 },
+    { "id": "codex", "lane": "pipeline", "col": 2, "type": "backend", "label": "Codex CLI", "sublabel": "agent execution", "width": 130 },
+    { "id": "skill", "lane": "pipeline", "col": 3, "type": "backend", "label": "Archify Skill", "sublabel": "diagram authoring", "tag": "archify", "width": 130 },
+    { "id": "read", "lane": "pipeline", "col": 4, "type": "backend", "label": "Read the12w repo", "sublabel": "codebase evidence", "width": 130 },
+    { "id": "json", "lane": "pipeline", "col": 4, "type": "backend", "label": "Architecture JSON", "sublabel": "typed specification", "width": 130, "yOffset": 64 },
+    { "id": "validate", "lane": "pipeline", "col": 4, "type": "security", "label": "Validation", "sublabel": "layout + semantics", "width": 130, "yOffset": 128 },
+    { "id": "html", "lane": "pipeline", "col": 4, "type": "cloud", "label": "architecture.html", "sublabel": "interactive artifact", "width": 130, "yOffset": 192 }
+  ],
+  "edges": [
+    { "id": "vscode-project", "from": "vscode", "to": "project", "label": "open workspace", "role": "main" },
+    { "id": "project-codex", "from": "project", "to": "codex", "label": "provide repository", "role": "main" },
+    { "id": "codex-skill", "from": "codex", "to": "skill", "label": "use skill", "variant": "emphasis", "role": "main" },
+    { "id": "skill-read", "from": "skill", "to": "read", "label": "inspect source", "role": "main" },
+    { "id": "read-json", "from": "read", "to": "json", "label": "author IR", "variant": "emphasis", "role": "main" },
+    { "id": "json-validate", "from": "json", "to": "validate", "label": "validate", "variant": "security", "role": "main" },
+    { "id": "validate-html", "from": "validate", "to": "html", "label": "deliver", "variant": "emphasis", "role": "main" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Source to specification", "items": ["Codex reads the repository as evidence", "Archify turns the authored model into typed JSON"] },
+    { "dot": "emerald", "title": "Trust gate", "items": ["Validation checks routes, labels, crossings, and composition", "Only a passing specification is delivered as architecture.html"] }
+  ]
+}
