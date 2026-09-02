@@ -1,4 +1,4 @@
-const CACHE_NAME = "chu-ky-12-v2";
+const CACHE_NAME = "chu-ky-12-v3";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -17,6 +17,13 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  // Planner and auth responses must always reflect the server state. Caching
+  // these endpoints could keep a removed seed record visible after deploy.
+  if (new URL(event.request.url).pathname.startsWith("/api/")) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   if (event.request.mode === "navigate") {
     event.respondWith(
