@@ -105,6 +105,27 @@ export type PlannerState = {
   updatedAt: string;
 };
 
+export const CYCLE_WEEKS = 12;
+export const CYCLE_DAYS = CYCLE_WEEKS * 7;
+
+export function addCalendarDays(date: string, days: number) {
+  const value = new Date(`${date.slice(0, 10)}T00:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}
+
+export function getCycleEndDate(startDate: string) {
+  return addCalendarDays(startDate, CYCLE_DAYS - 1);
+}
+
+export function getCycleWeekStartDate(startDate: string, week: number) {
+  return addCalendarDays(startDate, (Math.max(1, Math.min(CYCLE_WEEKS, week)) - 1) * 7);
+}
+
+export function getCycleWeekEndDate(startDate: string, week: number) {
+  return addCalendarDays(getCycleWeekStartDate(startDate, week), 6);
+}
+
 export type WeeklyTactic = Pick<WeeklyCommitment, "id" | "title" | "target" | "completed">;
 
 export function calculateCalendarPenalty(timeBlocks: TimeBlock[]): number {

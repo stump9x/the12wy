@@ -2,10 +2,21 @@
 
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Check, Circle, Clock3, Flame, Plus, Target } from "lucide-react";
-import { calculateCalendarPenalty, calculateExecutionScore, calculateGoalProgress } from "@twelve-cycle/domain";
+import { calculateCalendarPenalty, calculateExecutionScore, calculateGoalProgress, getCycleEndDate } from "@twelve-cycle/domain";
 import { usePlanner } from "@/components/planner-provider";
 import { LoadingState } from "@/components/loading-state";
 import { ActionHistoryChart } from "@/components/action-history-chart";
+
+function localDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(`${value}T00:00:00Z`));
+}
 
 export default function TodayPage() {
   const { state, updateState } = usePlanner();
@@ -16,7 +27,8 @@ export default function TodayPage() {
   const completed = state.commitments.reduce((sum, item) => sum + Math.min(item.completed, item.target), 0);
   const target = state.commitments.reduce((sum, item) => sum + item.target, 0);
   const primaryGoal = state.goals[0];
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
+  const cycleEndDate = getCycleEndDate(state.cycle.startDate);
   const todayBlocks = state.timeBlocks.filter((block) => block.date === today);
   const strategicMinutes = todayBlocks
     .filter((block) => block.type === "strategic")
@@ -42,6 +54,8 @@ export default function TodayPage() {
       <header className="topbar">
         <div>
           <div className="eyebrow">Week {state.cycle.currentWeek} · 12 Week Plan</div>
+          <div className="current-date"><CalendarDays size={15} /> Today · {formatDate(today)}</div>
+          <div className="cycle-range">Cycle {formatDate(state.cycle.startDate)} → {formatDate(cycleEndDate)}</div>
         </div>
         <Link className="primary-button" href="/plan#tactics"><Plus size={18} /> Thêm chiến thuật</Link>
       </header>
@@ -67,6 +81,7 @@ export default function TodayPage() {
           <div className="metric-heading"><span>Current Week</span><CalendarDays size={18} /></div>
           <div className="large-value">{String(state.cycle.currentWeek).padStart(2, "0")} <small>/ 12</small></div>
           <p>{12 - state.cycle.currentWeek} tuần để hoàn thành chu kỳ.</p>
+          <div className="metric-range">{formatDate(state.cycle.startDate)} → {formatDate(cycleEndDate)}</div>
         </article>
         <article className="metric-card">
           <div className="metric-heading"><span>Strategic Time</span><Clock3 size={18} /></div>

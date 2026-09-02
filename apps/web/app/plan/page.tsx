@@ -2,13 +2,24 @@
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { calculateGoalProgress } from "@twelve-cycle/domain";
+import { calculateGoalProgress, getCycleEndDate } from "@twelve-cycle/domain";
 import { createId, usePlanner } from "@/components/planner-provider";
 import { LoadingState } from "@/components/loading-state";
 import { PageHeader } from "@/components/page-header";
 
 function stepForUnit(unit: string) {
   return /giờ|hour/i.test(unit) ? 0.5 : 1;
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function localDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export default function PlanPage() {
@@ -102,6 +113,7 @@ export default function PlanPage() {
         </div>
         <label className="field"><span>Lý do quan trọng</span><textarea value={state.cycle.why} onChange={(event) => updateState((draft) => { draft.cycle.why = event.target.value; })} rows={2} /></label>
         </div>
+        <div className="cycle-timeline" aria-label="Mốc thời gian chu kỳ"><div><span>Today</span><strong>{formatDate(localDateKey())}</strong></div><div><span>Cycle Start</span><strong>{formatDate(state.cycle.startDate)}</strong></div><div><span>Cycle End</span><strong>{formatDate(getCycleEndDate(state.cycle.startDate))}</strong></div></div>
       </section>
 
       <section className="module-section">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CalendarDays, CheckCircle2, History, LayoutDashboard, ListChecks, LogOut, RotateCcw, Target } from "lucide-react";
+import { getCycleEndDate } from "@twelve-cycle/domain";
 import { usePlanner } from "@/components/planner-provider";
 
 const navigation = [
@@ -14,11 +15,16 @@ const navigation = [
   { href: "/journal", label: "Journal", icon: History },
 ];
 
+function formatShortDate(value: string) {
+  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(`${value}T00:00:00Z`));
+}
+
 export function PlannerAppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { state, saveStatus, error } = usePlanner();
   const week = state?.cycle.currentWeek ?? 1;
   const cycleProgress = Math.round((week / 12) * 100);
+  const cycleEndDate = state ? getCycleEndDate(state.cycle.startDate) : null;
 
   if (pathname === "/login" || pathname === "/setup") return <>{children}</>;
 
@@ -56,6 +62,7 @@ export function PlannerAppShell({ children }: { children: React.ReactNode }) {
             <span style={{ width: `${cycleProgress}%` }} />
           </div>
           <div className="cycle-meta"><span>Tuần {week}/12</span><span>{12 - week} tuần còn lại</span></div>
+          {state && cycleEndDate && <div className="cycle-period-meta"><span>Start {formatShortDate(state.cycle.startDate)}</span><span>End {formatShortDate(cycleEndDate)}</span></div>}
         </section>
 
         {saveStatus !== "saved" && (
