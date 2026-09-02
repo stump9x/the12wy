@@ -15,6 +15,7 @@ const seedIds = {
   timeBlocks: new Set(["block-1", "block-2"]),
   actionLogs: new Set(["action-1", "action-2", "action-3", "action-4", "action-5", "action-6", "action-7"]),
 };
+const seedCycleTitles = new Set(["12 Week Year", "Xây nền sản phẩm", "Xây nền sản phẩm gốc"]);
 
 async function createDatabase() {
   const dataDirectory = process.env.PGLITE_DATA_DIR ?? path.join(process.cwd(), ".data", "pglite");
@@ -100,8 +101,9 @@ function removeSeedData(state: PlannerState) {
     || next.timeBlocks.length !== state.timeBlocks.length
     || next.actionLogs.length !== state.actionLogs.length;
 
-  if (next.cycle.title === "12 Week Year") {
-    next.cycle.title = "";
+  if (seedCycleTitles.has(next.cycle.title)) {
+    const initialCycle = createInitialPlannerState().cycle;
+    next.cycle = { ...next.cycle, title: initialCycle.title, why: initialCycle.why, startDate: initialCycle.startDate, currentWeek: initialCycle.currentWeek };
     changed = true;
   }
 
