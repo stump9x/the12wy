@@ -6,6 +6,7 @@ import { calculateCalendarPenalty, calculateExecutionScore, calculateGoalProgres
 import { createId, usePlanner } from "@/components/planner-provider";
 import { LoadingState } from "@/components/loading-state";
 import { ActionHistoryChart } from "@/components/action-history-chart";
+import { FrameworkReminder } from "@/components/framework-reminder";
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -68,6 +69,8 @@ export default function TodayPage() {
         </div>
         <Link className="ghost-button" href="/week">Mở kế hoạch tuần <ArrowUpRight size={17} /></Link>
       </section>
+
+      <FrameworkReminder />
 
       <section className="metrics-grid" aria-label="Số liệu tuần">
         <article className="metric-card score-card">
