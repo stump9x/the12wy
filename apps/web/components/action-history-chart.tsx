@@ -24,6 +24,11 @@ function formatAmount(amount: number) {
   return Number.isInteger(amount) ? String(amount) : amount.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
 
+function formatWeekday(date: string) {
+  const value = new Date(`${date}T00:00:00Z`);
+  return value.getUTCDay() === 0 ? "Chủ nhật" : new Intl.DateTimeFormat("vi-VN", { weekday: "short" }).format(value);
+}
+
 function describeRingSegment(start: number, end: number, outerRadius = 100, innerRadius = 62) {
   const point = (radius: number, angle: number) => [150 + radius * Math.cos(angle), 150 + radius * Math.sin(angle)];
   const [outerStartX, outerStartY] = point(outerRadius, start);
@@ -45,7 +50,7 @@ export function ActionHistoryChart({ logs, commitments, currentWeek }: { logs: A
       return Array.from({ length: 7 }, (_, index) => {
         const date = offsetDate(today, mondayOffset(today) + index);
         const dateValue = logs.filter((log) => log.date === date).length;
-        return { key: date, label: new Intl.DateTimeFormat("vi-VN", { weekday: "short" }).format(new Date(`${date}T00:00:00`)), value: dateValue, detail: new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit" }).format(new Date(`${date}T00:00:00`)) };
+        return { key: date, label: formatWeekday(date), value: dateValue, detail: new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit" }).format(new Date(`${date}T00:00:00`)) };
       });
     }
     return Array.from({ length: 4 }, (_, index) => {
