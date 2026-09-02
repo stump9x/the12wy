@@ -166,7 +166,7 @@ export function createInitialPlannerState(now = new Date()): PlannerState {
     profile: { name: "User" },
     cycle: {
       id: "cycle-1",
-      title: "12 Week Year",
+      title: "",
       why: "",
       startDate: today,
       currentWeek: 1,

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const goalSchema = z.object({ id: z.string().min(1), title: z.string().min(1).max(160), why: z.string().max(1000), target: z.number().nonnegative(), current: z.number().nonnegative(), unit: z.string().min(1).max(80) });
-const cycleSchema = z.object({ id: z.string().min(1), title: z.string().min(1).max(160), why: z.string().max(2000), startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), currentWeek: z.number().int().min(1).max(12) });
+const cycleSchema = z.object({ id: z.string().min(1), title: z.string().trim().max(160), why: z.string().max(2000), startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), currentWeek: z.number().int().min(1).max(12) });
 const unitSchema = z.string().trim().min(1).max(40);
 const tacticSchema = z.object({ id: z.string().min(1), goalId: z.string().min(1), title: z.string().min(1).max(200), targetPerWeek: z.number().positive().max(1000), unit: unitSchema, scheduledDays: z.array(z.number().int().min(1).max(7)).max(7) });
 const commitmentSchema = z.object({ id: z.string().min(1), tacticId: z.string().min(1), goalId: z.string().min(1), title: z.string().min(1).max(200), target: z.number().positive().max(1000), completed: z.number().nonnegative().max(1000), unit: unitSchema });
