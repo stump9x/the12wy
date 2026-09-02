@@ -94,11 +94,16 @@ function removeSeedData(state: PlannerState) {
   next.timeBlocks = next.timeBlocks.filter((item) => !seedIds.timeBlocks.has(item.id));
   next.actionLogs = next.actionLogs.filter((item) => !seedIds.actionLogs.has(item.id));
 
-  const changed = next.goals.length !== state.goals.length
+  let changed = next.goals.length !== state.goals.length
     || next.tactics.length !== state.tactics.length
     || next.commitments.length !== state.commitments.length
     || next.timeBlocks.length !== state.timeBlocks.length
     || next.actionLogs.length !== state.actionLogs.length;
+
+  if (next.cycle.title === "12 Week Year") {
+    next.cycle.title = "";
+    changed = true;
+  }
 
   if (changed && !next.goals.length && !next.tactics.length && !next.commitments.length && !next.timeBlocks.length && !next.reviews.length && !next.actionLogs.length && !next.cycleHistory.length) {
     next.cycle = createInitialPlannerState().cycle;
