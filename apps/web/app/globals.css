@@ -171,6 +171,7 @@ p { color: var(--muted); }
 .data-row > div { min-width: 0; display: grid; gap: 5px; }
 .data-row strong { min-width: 0; overflow-wrap: anywhere; white-space: normal; font-size: 13px; line-height: 1.35; }
 .data-row span { color: var(--muted); font-size: 10px; }
+.tactic-row > div > span { font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; white-space: normal; }
 .tactic-row { grid-template-columns: minmax(0, 1fr) 92px auto 32px; padding: 8px 0; }
 .tactic-title-input { width: 100%; min-width: 0; min-height: 38px; border: 0; border-bottom: 1px solid transparent; padding: 4px 0; background: transparent; color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; resize: vertical; }
 .tactic-title-input:focus { border-color: var(--forest); outline: none; }
