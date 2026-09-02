@@ -154,6 +154,7 @@ p { color: var(--muted); }
 .cycle-settings > .field { grid-column: 3; }
 .field { display: grid; gap: 7px; color: var(--muted); font-size: 11px; font-weight: 650; }
 .field input, .field textarea, .field select, .review-question textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; background: #fbfaf6; color: var(--ink); padding: 11px 12px; font: inherit; font-size: 13px; resize: vertical; }
+.auto-resize-textarea { overflow-wrap: anywhere; white-space: pre-wrap; resize: none !important; overflow-y: hidden !important; }
 .field input, .field select { min-height: 42px; }
 .field input:focus, .field textarea:focus, .field select:focus, .review-question textarea:focus { border-color: #799381; background: #fff; }
 .form-grid { display: grid; gap: 14px; }
@@ -384,6 +385,9 @@ p { color: var(--muted); }
   .progress-inputs { grid-template-columns: 1fr auto 1fr; }
   .tactic-row { grid-template-columns: minmax(0, 1fr) minmax(120px, auto) 26px; gap: 8px; }
   .history-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .history-detail { max-height: none; overflow: visible; scrollbar-gutter: auto; }
+  .history-detail li { flex-direction: column; gap: 4px; }
+  .history-detail li strong { text-align: left; }
     .login-card { padding: 24px; border-radius: 18px; }
 }
 
