@@ -9,7 +9,6 @@
     "dev": "pnpm --filter @twelve-cycle/web dev",
     "build": "pnpm --filter @twelve-cycle/web build",
     "start": "pnpm --filter @twelve-cycle/web start",
-    "account:create": "node scripts/create-account.mjs",
     "typecheck": "pnpm -r typecheck",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down"

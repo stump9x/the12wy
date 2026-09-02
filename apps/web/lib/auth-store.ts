@@ -12,9 +12,7 @@ type StoredAccount = {
   createdAt: string;
 };
 
-export type AuthConfig =
-  | { username: string; secret: string; password: string }
-  | { username: string; secret: string; salt: string; passwordHash: string };
+export type AuthConfig = { username: string; secret: string; salt: string; passwordHash: string };
 
 function accountPath() {
   const dataDirectory = process.env.PGLITE_DATA_DIR ?? path.join(process.cwd(), ".data", "pglite");
@@ -36,11 +34,6 @@ async function readStoredAccount(): Promise<StoredAccount | null> {
 }
 
 export async function getAuthConfig(): Promise<AuthConfig | null> {
-  const username = process.env.AUTH_USERNAME?.trim();
-  const password = process.env.AUTH_PASSWORD;
-  const secret = process.env.AUTH_SECRET;
-  if (username && password && validSecret(secret)) return { username, password, secret };
-
   const account = await readStoredAccount();
   return account ? { username: account.username, salt: account.salt, passwordHash: account.passwordHash, secret: account.secret } : null;
 }

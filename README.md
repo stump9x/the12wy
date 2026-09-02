@@ -103,15 +103,7 @@ pnpm build
 pnpm start
 ```
 
-Tạo tài khoản local qua terminal (username và password không nằm trong code):
-
-```bash
-pnpm account:create
-```
-
-Lệnh sẽ hỏi username, che mật khẩu khi gõ, tự sinh `AUTH_SECRET` và ghi vào `apps/web/.env.local`. Hãy khởi động lại `pnpm dev` sau khi tạo hoặc đổi tài khoản. File này đã được gitignore; production nên dùng secret manager hoặc environment riêng.
-
-Nếu muốn tạo bằng giao diện, khi hệ thống chưa có account hãy mở `/setup`. Form thiết lập lần đầu nhận username/password bằng bàn phím, lưu password dưới dạng hash trong thư mục dữ liệu và tự khóa sau khi account đầu tiên được tạo.
+Khi hệ thống chưa có account, mở `/setup` để tạo lần đầu bằng giao diện. Username và password chỉ được nhập tại runtime; password được lưu dưới dạng hash và secret phiên được sinh ngẫu nhiên trong thư mục dữ liệu bền vững. Sau khi tạo account, `/setup` tự khóa và hệ thống chuyển sang `/login`.
 
 Biến môi trường:
 
@@ -120,13 +112,10 @@ PGLITE_DATA_DIR=.data/pglite
 NEXT_PUBLIC_APP_URL=http://107.161.168.82:12500
 APP_BIND_ADDRESS=0.0.0.0
 APP_PORT=12500
-AUTH_USERNAME=<tên đăng nhập do bạn tự đặt>
-AUTH_PASSWORD=<mật khẩu do bạn tự đặt>
-AUTH_SECRET=<chuỗi ngẫu nhiên tối thiểu 32 ký tự>
 AUTH_COOKIE_SECURE=false
 ```
 
-`AUTH_USERNAME`, `AUTH_PASSWORD` và `AUTH_SECRET` không có giá trị dự phòng trong code. Với local development, đặt chúng trong `apps/web/.env.local` (đã được gitignore) hoặc secret manager trước khi chạy; nếu thiếu, endpoint đăng nhập sẽ từ chối hoạt động.
+Không đặt username, password hoặc secret vào source code hay `.env`. Dữ liệu xác thực được tạo một lần tại `/setup` và lưu trong persistent volume của ứng dụng.
 
 ## Chạy bằng Docker
 
@@ -134,7 +123,6 @@ Tạo file `.env` trên máy triển khai từ mẫu (không commit file này v�
 
 ```bash
 cp .env.example .env
-# chỉnh AUTH_USERNAME, AUTH_PASSWORD, AUTH_SECRET trong .env
 docker compose up -d --build
 ```
 
@@ -151,7 +139,7 @@ docker compose down
 
 Lệnh trên giữ nguyên dữ liệu. Chỉ thêm `--volumes` khi thực sự muốn xóa toàn bộ planner local.
 
-Image lắng nghe cổng nội bộ `3000`, chạy bằng user `nextjs`, có endpoint kiểm tra tại `/api/health`, và ghi database vào `/app/data/pglite`. Docker Compose bắt buộc nhận `AUTH_USERNAME`, `AUTH_PASSWORD` và `AUTH_SECRET` từ environment/secret bên ngoài source code; đặt `AUTH_COOKIE_SECURE=true` khi chạy qua HTTPS. Cổng `12500` chỉ giảm va chạm với bot quét tự động, không thay thế firewall, cập nhật hệ điều hành hoặc HTTPS. Với môi trường thực tế, nên đặt reverse proxy (Nginx/Caddy) phía trước, chỉ mở `80/443`, bật HTTPS rồi đặt `AUTH_COOKIE_SECURE=true`. Có thể triển khai trên VPS nếu gắn persistent volume vào `/app/data`; nền tảng dùng filesystem tạm thời không phù hợp với PGlite, khi đó hãy dùng PostgreSQL managed.
+Image lắng nghe cổng nội bộ `3000`, chạy bằng user `nextjs`, có endpoint kiểm tra tại `/api/health`, ghi database và dữ liệu xác thực vào `/app/data/pglite`. Cổng `12500` chỉ giảm va chạm với bot quét tự động, không thay thế firewall, cập nhật hệ điều hành hoặc HTTPS. Với môi trường thực tế, nên đặt reverse proxy (Nginx/Caddy) phía trước, chỉ mở `80/443`, bật HTTPS rồi đặt `AUTH_COOKIE_SECURE=true`. Có thể triển khai trên VPS nếu gắn persistent volume vào `/app/data`; nền tảng dùng filesystem tạm thời không phù hợp với PGlite, khi đó hãy dùng PostgreSQL managed.
 
 ## API và dữ liệu
 

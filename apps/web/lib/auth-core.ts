@@ -66,7 +66,6 @@ export async function verifySessionToken(token?: string | null): Promise<AuthSes
 export async function verifyCredentials(username: string, password: string) {
   const config = await getAuthConfig();
   if (!config || !constantTimeEqual(username, config.username)) return false;
-  if ("password" in config) return constantTimeEqual(password, config.password);
   return verifyPassword(password, config.salt, config.passwordHash);
 }
 
