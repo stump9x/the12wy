@@ -29,7 +29,7 @@ export function PlannerProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch("/api/state", { cache: "no-store" });
       if (response.status === 401) {
-        window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+        window.location.replace(`/login?next=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
       if (!response.ok) throw new Error("Không thể tải dữ liệu planner.");
@@ -64,7 +64,7 @@ export function PlannerProvider({ children }: { children: React.ReactNode }) {
           signal: controller.signal,
         });
         if (response.status === 401) {
-          window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+          window.location.replace(`/login?next=${encodeURIComponent(window.location.pathname)}`);
           return;
         }
         if (!response.ok) throw new Error("Không thể lưu thay đổi.");
@@ -107,5 +107,11 @@ export function usePlanner() {
 }
 
 export function createId(prefix: string) {
-  return `${prefix}-${crypto.randomUUID()}`;
+  const randomUuid = globalThis.crypto?.randomUUID?.();
+  if (randomUuid) return `${prefix}-${randomUuid}`;
+
+  // randomUUID is unavailable in some non-secure HTTP contexts (for example
+  // when the app is opened directly through a VPS IP). Keep client actions
+  // usable there without relying on a hard-coded identifier.
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }

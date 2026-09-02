@@ -13,20 +13,25 @@ export default function LoginPage() {
     setSubmitting(true);
     setError("");
     const formData = new FormData(event.currentTarget);
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: formData.get("username"), password: formData.get("password") }),
-    });
-    const result = (await response.json()) as { message?: string };
-    if (!response.ok) {
-      setError(result.message ?? "Không thể đăng nhập.");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: formData.get("username"), password: formData.get("password") }),
+      });
+      const result = (await response.json().catch(() => ({}))) as { message?: string };
+      if (!response.ok) {
+        setError(result.message ?? "Không thể đăng nhập.");
+        return;
+      }
+      const requestedPath = new URLSearchParams(window.location.search).get("next");
+      const nextPath = requestedPath?.startsWith("/") && !requestedPath.startsWith("//") ? requestedPath : "/";
+      window.location.replace(nextPath);
+    } catch {
+      setError("Không thể kết nối đến hệ thống. Vui lòng thử lại.");
+    } finally {
       setSubmitting(false);
-      return;
     }
-    const requestedPath = new URLSearchParams(window.location.search).get("next");
-    const nextPath = requestedPath?.startsWith("/") && !requestedPath.startsWith("//") ? requestedPath : "/";
-    window.location.assign(nextPath);
   }
 
   return (

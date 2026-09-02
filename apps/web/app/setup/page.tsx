@@ -12,18 +12,23 @@ export default function SetupPage() {
     setSubmitting(true);
     setError("");
     const formData = new FormData(event.currentTarget);
-    const response = await fetch("/api/auth/setup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: formData.get("username"), password: formData.get("password"), confirmation: formData.get("confirmation") }),
-    });
-    const result = (await response.json()) as { message?: string };
-    if (!response.ok) {
-      setError(result.message ?? "Không thể tạo tài khoản.");
+    try {
+      const response = await fetch("/api/auth/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: formData.get("username"), password: formData.get("password"), confirmation: formData.get("confirmation") }),
+      });
+      const result = (await response.json().catch(() => ({}))) as { message?: string };
+      if (!response.ok) {
+        setError(result.message ?? "Không thể tạo tài khoản.");
+        return;
+      }
+      window.location.replace("/login?created=1");
+    } catch {
+      setError("Không thể kết nối đến hệ thống. Vui lòng thử lại.");
+    } finally {
       setSubmitting(false);
-      return;
     }
-    window.location.assign("/login?created=1");
   }
 
   return (

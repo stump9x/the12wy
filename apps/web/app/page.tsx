@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Check, Circle, Clock3, Flame, Plus, Target } from "lucide-react";
 import { calculateCalendarPenalty, calculateExecutionScore, calculateGoalProgress, getCycleEndDate } from "@twelve-cycle/domain";
-import { usePlanner } from "@/components/planner-provider";
+import { createId, usePlanner } from "@/components/planner-provider";
 import { LoadingState } from "@/components/loading-state";
 import { ActionHistoryChart } from "@/components/action-history-chart";
 
@@ -45,7 +45,7 @@ export default function TodayPage() {
       const previous = commitment.completed;
       commitment.completed = commitment.completed >= commitment.target ? 0 : commitment.target;
       const delta = commitment.completed - previous;
-      if (delta > 0) draft.actionLogs.push({ id: `action-${crypto.randomUUID()}`, date: new Date().toISOString().slice(0, 10), week: draft.cycle.currentWeek, commitmentId: commitment.id, amount: delta });
+      if (delta > 0) draft.actionLogs.push({ id: createId("action"), date: new Date().toISOString().slice(0, 10), week: draft.cycle.currentWeek, commitmentId: commitment.id, amount: delta });
     });
   }
 

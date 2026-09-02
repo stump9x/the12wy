@@ -29,8 +29,11 @@ export function PlannerAppShell({ children }: { children: React.ReactNode }) {
   if (pathname === "/login" || pathname === "/setup") return <>{children}</>;
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.assign("/login");
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      window.location.replace("/login");
+    }
   }
 
   return (
