@@ -19,7 +19,7 @@ export function FrameworkReminder() {
   return (
     <section className="panel framework-reminder" aria-labelledby="framework-reminder-title">
       <div className="framework-heading">
-        <h3 id="framework-reminder-title">The 12 Week Year Framework</h3>
+        <h3 id="framework-reminder-title">The 12 Week Year Execution System</h3>
       </div>
       <div className="framework-groups">
         <FrameworkList title="3 Principles" items={principles} />
