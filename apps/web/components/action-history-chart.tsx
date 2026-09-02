@@ -41,9 +41,8 @@ function describeRingSegment(start: number, end: number, outerRadius = 100, inne
 
 export function ActionHistoryChart({ logs, commitments, currentWeek }: { logs: ActionLog[]; commitments: WeeklyCommitment[]; currentWeek: number }) {
   const today = new Date().toISOString().slice(0, 10);
-  const todayIndex = -mondayOffset(today);
   const [period, setPeriod] = useState<Period>("day");
-  const [selectedIndex, setSelectedIndex] = useState(todayIndex);
+  const [selectedKey, setSelectedKey] = useState(today);
   const commitmentMap = useMemo(() => new Map(commitments.map((item) => [item.id, item])), [commitments]);
   const entries = useMemo<ChartEntry[]>(() => {
     if (period === "day") {
@@ -53,15 +52,17 @@ export function ActionHistoryChart({ logs, commitments, currentWeek }: { logs: A
         return { key: date, label: formatWeekday(date), value: dateValue, detail: new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit" }).format(new Date(`${date}T00:00:00`)) };
       });
     }
-    return Array.from({ length: 4 }, (_, index) => {
-      const week = Math.max(1, currentWeek - 3 + index);
+    const firstWeek = Math.max(1, currentWeek - 3);
+    return Array.from({ length: currentWeek - firstWeek + 1 }, (_, index) => {
+      const week = firstWeek + index;
       const weekValue = logs.filter((log) => log.week === week).length;
       return { key: `week-${week}`, label: `Tuần ${week}`, value: weekValue, detail: "trong chu kỳ hiện tại" };
     });
   }, [currentWeek, logs, period, today]);
 
   const total = entries.reduce((sum, entry) => sum + entry.value, 0);
-  const selected = entries[Math.min(selectedIndex, entries.length - 1)] ?? entries[0];
+  const fallbackKey = period === "day" ? today : `week-${currentWeek}`;
+  const selected = entries.find((entry) => entry.key === selectedKey) ?? entries.find((entry) => entry.key === fallbackKey) ?? entries.at(-1);
   const selectedLogs = selected ? logs.filter((log) => period === "day" ? log.date === selected.key : log.week === Number(selected.key.replace("week-", ""))) : [];
   const selectedDetails = selectedLogs.reduce((result, log) => {
     const commitment = commitmentMap.get(log.commitmentId);
@@ -77,7 +78,7 @@ export function ActionHistoryChart({ logs, commitments, currentWeek }: { logs: A
 
   return (
     <section className="panel action-history" aria-labelledby="action-history-title">
-      <div className="panel-header"><div><h3 id="action-history-title">Action History</h3></div><div className="period-switch" role="group" aria-label="Khoảng thời gian thống kê"><button className={period === "day" ? "active" : ""} onClick={() => { setPeriod("day"); setSelectedIndex(todayIndex); }}>7 ngày</button><button className={period === "week" ? "active" : ""} onClick={() => { setPeriod("week"); setSelectedIndex(3); }}>4 tuần</button></div></div>
+      <div className="panel-header"><div><h3 id="action-history-title">Action History</h3></div><div className="period-switch" role="group" aria-label="Khoảng thời gian thống kê"><button className={period === "day" ? "active" : ""} onClick={() => { setPeriod("day"); setSelectedKey(today); }}>1 tuần</button><button className={period === "week" ? "active" : ""} onClick={() => { setPeriod("week"); setSelectedKey(`week-${currentWeek}`); }}>4 tuần</button></div></div>
       <div className="history-chart-layout">
         <div className="donut-wrap">
           <svg className="donut-chart" viewBox="0 0 300 300" aria-label={`Biểu đồ lịch sử hành động theo ${period === "day" ? "ngày" : "tuần"}`}>
@@ -85,14 +86,14 @@ export function ActionHistoryChart({ logs, commitments, currentWeek }: { logs: A
               const start = angle;
               angle += (chartValues[index] / chartTotal) * Math.PI * 2;
               if (!entry.value && total > 0) return null;
-              return <path key={entry.key} className={selected?.key === entry.key ? "selected" : ""} d={describeRingSegment(start, angle - 0.018)} fill={colors[index % colors.length]} tabIndex={0} role="button" aria-label={`${entry.label}: ${formatAmount(entry.value)} hành động`} onClick={() => setSelectedIndex(index)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedIndex(index); }} />;
+              return <path key={entry.key} className={selected?.key === entry.key ? "selected" : ""} d={describeRingSegment(start, angle - 0.018)} fill={colors[index % colors.length]} tabIndex={0} role="button" aria-label={`${entry.label}: ${formatAmount(entry.value)} hành động`} onClick={() => setSelectedKey(entry.key)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedKey(entry.key); }} />;
             })}
           </svg>
           <div className="donut-total"><strong>{formatAmount(total)}</strong><span>hành động đã ghi</span></div>
         </div>
         <div className="history-detail"><h4>{selected?.label} · {selected?.detail}</h4>{selectedDetails.length ? <ul>{selectedDetails.map((item) => <li key={item.title}><span>{item.title}</span><strong>{formatAmount(item.amount)} {item.unit}</strong></li>)}</ul> : <p>Chưa có nhật ký hành động trong khoảng này.</p>}</div>
       </div>
-      <div className="history-legend">{entries.map((entry, index) => <button key={entry.key} className={selected?.key === entry.key ? "active" : ""} onClick={() => setSelectedIndex(index)}><i style={{ background: colors[index % colors.length] }} /> <span>{entry.label}</span><strong>{formatAmount(entry.value)}</strong></button>)}</div>
+      <div className="history-legend">{entries.map((entry, index) => <button key={entry.key} className={selected?.key === entry.key ? "active" : ""} onClick={() => setSelectedKey(entry.key)}><i style={{ background: colors[index % colors.length] }} /> <span>{entry.label}</span><strong>{formatAmount(entry.value)}</strong></button>)}</div>
     </section>
   );
 }
