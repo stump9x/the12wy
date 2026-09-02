@@ -58,13 +58,14 @@ export function PlannerAppShell({ children }: { children: React.ReactNode }) {
           <div className="cycle-meta"><span>Tuần {week}/12</span><span>{12 - week} tuần còn lại</span></div>
         </section>
 
-        <div className={`save-state ${saveStatus}`} role="status">
-          <CheckCircle2 size={14} />
-          {saveStatus === "loading" && "Đang tải dữ liệu"}
-          {saveStatus === "saving" && "Đang lưu thay đổi"}
-          {saveStatus === "saved" && "Đã lưu trên thiết bị chủ"}
-          {saveStatus === "error" && (error ?? "Lưu thất bại")}
-        </div>
+        {saveStatus !== "saved" && (
+          <div className={`save-state ${saveStatus}`} role="status">
+            <CheckCircle2 size={14} />
+            {saveStatus === "loading" && "Đang tải dữ liệu"}
+            {saveStatus === "saving" && "Đang lưu thay đổi"}
+            {saveStatus === "error" && (error ?? "Lưu thất bại")}
+          </div>
+        )}
         <button className="logout-button" onClick={logout}><LogOut size={14} /> Đăng xuất</button>
       </aside>
       <section className="workspace">{children}</section>

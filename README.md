@@ -150,7 +150,7 @@ Image lắng nghe cổng nội bộ `3000`, chạy bằng user `nextjs`, có end
 - `PUT /api/state`: kiểm tra toàn bộ dữ liệu bằng Zod rồi cập nhật vào PostgreSQL nhúng.
 - `GET /api/health`: health check nhẹ cho container/orchestrator.
 
-Ứng dụng tự lưu sau khoảng 450 ms kể từ thay đổi cuối và hiển thị trạng thái `Đang lưu`, `Đã lưu` hoặc lỗi. Mọi mốc thời gian được lưu theo ISO/UTC; ngày và giờ khối thời gian được giữ theo dữ liệu người dùng nhập cho đến khi bổ sung múi giờ hồ sơ đầy đủ.
+Ứng dụng tự lưu sau khoảng 450 ms kể từ thay đổi cuối và chỉ hiển thị trạng thái khi đang tải, đang lưu hoặc xảy ra lỗi. Mọi mốc thời gian được lưu theo ISO/UTC; ngày và giờ khối thời gian được giữ theo dữ liệu người dùng nhập cho đến khi bổ sung múi giờ hồ sơ đầy đủ.
 
 ## Tối ưu mobile
 
