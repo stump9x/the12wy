@@ -94,6 +94,8 @@ function removeSeedData(state: PlannerState) {
   next.commitments = next.commitments.filter((item) => !seedIds.commitments.has(item.id));
   next.timeBlocks = next.timeBlocks.filter((item) => !seedIds.timeBlocks.has(item.id));
   next.actionLogs = next.actionLogs.filter((item) => !seedIds.actionLogs.has(item.id));
+  const validCommitmentIds = new Set(next.commitments.map((item) => item.id));
+  next.actionLogs = next.actionLogs.filter((item) => validCommitmentIds.has(item.commitmentId));
 
   let changed = next.goals.length !== state.goals.length
     || next.tactics.length !== state.tactics.length
