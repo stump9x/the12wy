@@ -8,6 +8,13 @@ import { plannerStateSchema } from "@/lib/planner-schema";
 
 type PlannerRow = { data: unknown };
 const globalForDatabase = globalThis as typeof globalThis & { plannerDatabase?: Promise<PGlite> };
+const seedIds = {
+  goals: new Set(["goal-1", "goal-2"]),
+  tactics: new Set(["tactic-1", "tactic-2", "tactic-3"]),
+  commitments: new Set(["commitment-1", "commitment-2", "commitment-3"]),
+  timeBlocks: new Set(["block-1", "block-2"]),
+  actionLogs: new Set(["action-1", "action-2", "action-3", "action-4", "action-5", "action-6", "action-7"]),
+};
 
 async function createDatabase() {
   const dataDirectory = process.env.PGLITE_DATA_DIR ?? path.join(process.cwd(), ".data", "pglite");
@@ -79,17 +86,40 @@ function migratePlannerState(input: unknown): PlannerState {
   return plannerStateSchema.parse({ ...legacy, version: 7, cycleHistory, actionLogs });
 }
 
+function removeSeedData(state: PlannerState) {
+  const next = structuredClone(state);
+  next.goals = next.goals.filter((item) => !seedIds.goals.has(item.id));
+  next.tactics = next.tactics.filter((item) => !seedIds.tactics.has(item.id));
+  next.commitments = next.commitments.filter((item) => !seedIds.commitments.has(item.id));
+  next.timeBlocks = next.timeBlocks.filter((item) => !seedIds.timeBlocks.has(item.id));
+  next.actionLogs = next.actionLogs.filter((item) => !seedIds.actionLogs.has(item.id));
+
+  const changed = next.goals.length !== state.goals.length
+    || next.tactics.length !== state.tactics.length
+    || next.commitments.length !== state.commitments.length
+    || next.timeBlocks.length !== state.timeBlocks.length
+    || next.actionLogs.length !== state.actionLogs.length;
+
+  if (changed && !next.goals.length && !next.tactics.length && !next.commitments.length && !next.timeBlocks.length && !next.reviews.length && !next.actionLogs.length && !next.cycleHistory.length) {
+    next.cycle = createInitialPlannerState().cycle;
+    next.profile = createInitialPlannerState().profile;
+  }
+  return { state: next, changed };
+}
+
 export async function getPlannerState(userId = "local-user"): Promise<PlannerState> {
   const database = await getDatabase();
   const result = await database.query<PlannerRow>("SELECT data FROM planner_states WHERE user_id = $1", [userId]);
   if (result.rows[0]?.data) {
     const persisted = result.rows[0].data;
     const migrated = migratePlannerState(persisted);
+    const cleaned = removeSeedData(migrated);
+    const nextState = cleaned.state;
     const persistedRecord = persisted && typeof persisted === "object" ? persisted as Record<string, unknown> : {};
     const persistedCycle = persistedRecord.cycle && typeof persistedRecord.cycle === "object" ? persistedRecord.cycle as Record<string, unknown> : {};
-    const needsRewrite = persistedRecord.version !== migrated.version || "visions" in persistedRecord || "vision" in persistedCycle;
-    if (needsRewrite) await savePlannerState(migrated, userId);
-    return migrated;
+    const needsRewrite = persistedRecord.version !== nextState.version || "visions" in persistedRecord || "vision" in persistedCycle || cleaned.changed;
+    if (needsRewrite) await savePlannerState(nextState, userId);
+    return nextState;
   }
   const initialState = createInitialPlannerState();
   await savePlannerState(initialState, userId);
